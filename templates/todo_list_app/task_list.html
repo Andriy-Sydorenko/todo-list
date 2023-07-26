@@ -40,8 +40,9 @@
       {% if task.deadline %}
         <p>Deadline: {{ task.deadline }}</p>
       {% endif %}
+      <strong>Tags: </strong>
       {% for tag in task.tags.all %}
-        <strong>Tags: </strong>{{ tag }}
+        {{ tag }}
       {% endfor %}
       <hr>
     {% endfor %}
