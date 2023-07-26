@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import generic
 
 from todo_list_app.forms import (TaskSearchForm,
@@ -58,6 +58,7 @@ class TaskUpdateView(LoginRequiredMixin, generic.UpdateView):
 class TaskDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Task
     template_name = "todo_list_app/task_confirm_delete.html"
+    success_url = reverse_lazy("todo_list_app:index")
 
 
 class TaskCompleteView(LoginRequiredMixin, generic.RedirectView):
@@ -65,7 +66,12 @@ class TaskCompleteView(LoginRequiredMixin, generic.RedirectView):
         task = get_object_or_404(Task, pk=self.kwargs["pk"])
         task.is_done = True
         task.save()
-        return reverse_lazy("todo_list_app:index")
+
+        query_params = self.request.GET.copy()
+        current_page = self.request.GET.get("page", 1)
+        query_params["page"] = current_page
+        url = f"{reverse('todo_list_app:index')}?{query_params.urlencode()}"
+        return url
 
 
 class TaskUndoView(generic.RedirectView):
@@ -73,7 +79,12 @@ class TaskUndoView(generic.RedirectView):
         task = get_object_or_404(Task, pk=self.kwargs["pk"])
         task.is_done = False
         task.save()
-        return reverse_lazy("todo_list_app:index")
+
+        query_params = self.request.GET.copy()
+        current_page = self.request.GET.get("page", 1)
+        query_params["page"] = current_page
+        url = f"{reverse('todo_list_app:index')}?{query_params.urlencode()}"
+        return url
 
 
 class TagListView(generic.ListView):
